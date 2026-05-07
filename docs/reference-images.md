@@ -8,19 +8,11 @@ Create this folder structure:
 ```text
 refs/
   harry_potter/
-    harry_1.jpg
-    harry_2.jpg
   hermione_granger/
-    hermione_1.jpg
-    hermione_2.jpg
   prof_mcgonagall/
-    mcgonagall_1.jpg
-    mcgonagall_2.jpg
   prof_severus_snape/
-    snape_1.jpg
   ron_weasley/
-    ron_1.jpg
-    ron_2.jpg
+
 ```
 
 The loader walks each character folder recursively, so you can keep images
