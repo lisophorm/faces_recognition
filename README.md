@@ -19,14 +19,15 @@ The implementation uses:
 
 Create and activate a virtual environment, then install the dependencies from the project root:
 
-```bash
+```
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt```
+pip install -r requirements.txt
+```
 
 On Windows PowerShell:
 
-```powershell
+```
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
