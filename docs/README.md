@@ -9,5 +9,6 @@ Start here:
 - [Reference Images](./reference-images.md)
 - [Troubleshooting](./troubleshooting.md)
 - [Approach](./approach.md)
+- [Original White Swan Request](./original-white-swan-request.md)
 
 The main entry point for the code is `annotate_video.py` in the project root.

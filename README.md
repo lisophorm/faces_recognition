@@ -1,6 +1,7 @@
 # White Swan Data Video Annotation
 
-This project annotates an MP4 video by detecting faces and labelling known Harry Potter characters using reference face images.
+This project annotates an MP4 video by detecting faces and labelling known
+Harry Potter characters using reference face images.
 
 ## Quick start
 
@@ -18,4 +19,5 @@ Run the annotator:
 python annotate_video.py --input input/nimbus.mp4 --refs refs --output annotated.mp4
 ```
 
-See [docs](./docs/README.md) for setup, usage, reference image guidance, troubleshooting, and implementation notes.
+See [docs](./docs/README.md) for setup, usage, reference image guidance,
+troubleshooting, and implementation notes.
