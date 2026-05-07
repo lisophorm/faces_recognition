@@ -18,8 +18,7 @@ Create and activate a virtual environment, then install the dependencies from th
 ```bash
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-```
+pip install -r requirements.txt```
 
 On Windows PowerShell:
 
@@ -27,6 +26,15 @@ On Windows PowerShell:
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+```
+
+The `scripts/bootstrap.sh` helper normalizes TensorFlow to the CPU wheel on
+Linux. On Windows, use the same Python environment and install the CPU-only
+TensorFlow wheel manually if needed:
+
+```powershell
+python -m pip uninstall -y tensorflow
+python -m pip install --force-reinstall tensorflow-cpu==2.21.0
 ```
 
 Place the downloaded input video at `input/nimbus.mp4`, create reference images under `refs/`, then run:
