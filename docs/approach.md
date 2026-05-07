@@ -38,3 +38,5 @@ For faster processing, use a higher value, such as:
 ```bash
 --recognition-interval 10
 ```
+
+## go to [Original White Swan Request](./original-white-swan-request.md)

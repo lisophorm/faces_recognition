@@ -43,3 +43,5 @@ The project uses:
 - `numpy` for vector operations
 
 The script sets `TF_USE_LEGACY_KERAS=1` before importing DeepFace so that RetinaFace works reliably with current TensorFlow/Keras installations.
+
+## Go to [Usage](./usage.md)

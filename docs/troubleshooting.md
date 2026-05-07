@@ -57,3 +57,5 @@ The script writes MP4 using OpenCV's `mp4v` codec. If a player has trouble openi
 ```bash
 ffmpeg -i output/annotated.mp4 -vcodec libx264 -pix_fmt yuv420p output/annotated_h264.mp4
 ```
+
+## Go to [Approach](./approach.md)

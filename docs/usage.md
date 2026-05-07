@@ -79,3 +79,5 @@ The output is an MP4 file with:
 - bounding boxes around detected faces
 - character names where recognition is confident enough
 - `Unknown` for faces that do not match the reference set
+
+## go to [Reference Images](./reference-images.md)

@@ -43,3 +43,5 @@ the output video:
 - `prof_mcgonagall` -> `Prof. McGonagall`
 - `prof_severus_snape` -> `Prof. Severus Snape`
 - `ron_weasley` -> `Ron Weasley`
+
+## go to [Troubleshooting](./troubleshooting.md)
