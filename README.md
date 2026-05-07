@@ -2,9 +2,7 @@
 
 This project is a coding-assessment solution that annotates an MP4 video by detecting faces and labelling known Harry Potter characters using DeepFace.
 
-**This assessment presented a problem space I had not worked with directly before. I approached the task as an engineering and research exercise.**
-
-**I believe the final result strongly reflects my capacity to quickly research unfamiliar domains, analyse trade-offs, make pragmatic technical decisions, and deliver a working solution on time and within scope.**
+It is designed to run after a clean clone and a standard Python install, without CUDA or NVIDIA driver dependencies. GPU acceleration is intentionally disabled by default for portability and reproducibility.
 
 The implementation uses:
 
@@ -15,7 +13,7 @@ The implementation uses:
 
 ## Quick start
 
-Create and activate a virtual environment, then install the dependencies:
+Create and activate a virtual environment, then install the dependencies from the project root:
 
 ```bash
 python -m venv .venv
@@ -58,6 +56,8 @@ refs/
 
 Each folder can contain one or more `.jpg`, `.jpeg`, `.png`, or `.webp` files. More than one clear face image per character usually improves recognition.
 
+The loader also scans subfolders recursively, so it is safe to organise poses or source images under each character directory.
+
 ## Submission checklist
 
 Before sending the assessment back, include:
@@ -69,5 +69,11 @@ Before sending the assessment back, include:
 - `AGENTS.md`
 - the generated annotated MP4 output
 - either the reference images used or a note explaining how the reference gallery was built
+
+Recommended final check:
+
+```bash
+python annotate_video.py --input input/nimbus.mp4 --refs refs --output output/test_annotated.mp4 --max-frames 50
+```
 
 See [docs](./docs/README.md) for setup, usage, reference image guidance, troubleshooting, and implementation notes.

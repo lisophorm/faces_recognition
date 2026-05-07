@@ -10,6 +10,11 @@ Recommended environment:
 
 Python 3.12 may work with recent TensorFlow builds, but Python 3.10 or 3.11 is the safer choice for DeepFace/TensorFlow compatibility.
 
+The script runs in CPU-only mode by default so the assessment can be executed
+on a fresh clone without installing CUDA or NVIDIA user-space libraries. That
+keeps the deliverable reproducible on systems that only have a standard Python
+environment available.
+
 Install dependencies from the project root:
 
 ```bash

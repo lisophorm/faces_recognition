@@ -17,11 +17,15 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 # DeepFace/RetinaFace are more reliable with current TensorFlow installs when
 # legacy Keras compatibility is enabled. `tf-keras` is included in requirements.
 os.environ.setdefault("TF_USE_LEGACY_KERAS", "1")
+# Force CPU execution for a clean-clone deliverable. The exercise does not require
+# GPU acceleration, and this avoids CUDA library/runtime mismatches on fresh installs.
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 DEFAULT_RECOGNITION_INTERVAL = 5
 DEFAULT_THRESHOLD = 0.35
+DEFAULT_DETECTION_MAX_DIM = 960
 REFERENCE_LABELS = {
     "harry_potter": "Harry Potter",
     "hermione_granger": "Hermione Granger",
@@ -108,6 +112,15 @@ def parse_args() -> argparse.Namespace:
         help="Draw the cosine distance next to known labels for debugging/tuning.",
     )
     parser.add_argument(
+        "--detection-max-dim",
+        type=int,
+        default=DEFAULT_DETECTION_MAX_DIM,
+        help=(
+            "Downscale frames to this maximum dimension before RetinaFace runs. "
+            "Set to 0 to disable resizing."
+        ),
+    )
+    parser.add_argument(
         "--max-frames",
         type=int,
         default=None,
@@ -164,6 +177,8 @@ def validate_processing_args(args: argparse.Namespace) -> None:
         raise ValueError("--threshold must be a finite non-negative number")
     if not np.isfinite(args.min_face_confidence) or args.min_face_confidence < 0:
         raise ValueError("--min-face-confidence must be a finite non-negative number")
+    if args.detection_max_dim < 0:
+        raise ValueError("--detection-max-dim must be at least 0")
     if not args.input.is_file():
         raise FileNotFoundError(f"Input video does not exist: {args.input}")
     if not args.refs.is_dir():
@@ -192,6 +207,29 @@ def cosine_distance(left: np.ndarray, right: np.ndarray) -> float:
     if denominator == 0:
         return float("inf")
     return float(1 - np.dot(left, right) / denominator)
+
+
+def resize_for_detection(
+    frame_bgr: np.ndarray,
+    *,
+    max_dim: int,
+) -> tuple[np.ndarray, float, float]:
+    """Resize a frame for detection and return scale factors back to source size."""
+    if max_dim <= 0:
+        return frame_bgr, 1.0, 1.0
+
+    height, width = frame_bgr.shape[:2]
+    largest_dim = max(height, width)
+    if largest_dim <= max_dim:
+        return frame_bgr, 1.0, 1.0
+
+    scale = max_dim / float(largest_dim)
+    resized = cv2.resize(
+        frame_bgr,
+        (int(round(width * scale)), int(round(height * scale))),
+        interpolation=cv2.INTER_AREA,
+    )
+    return resized, width / resized.shape[1], height / resized.shape[0]
 
 
 def embedding_from_image(
@@ -310,11 +348,16 @@ def detect_and_recognize(
     detector_backend: str,
     threshold: float,
     min_face_confidence: float,
+    detection_max_dim: int,
 ) -> list[FaceAnnotation]:
     # Detection and recognition are intentionally split. RetinaFace finds boxes;
     # Facenet512 then embeds each cropped face for identity matching.
+    detection_frame, scale_x, scale_y = resize_for_detection(
+        frame_bgr,
+        max_dim=detection_max_dim,
+    )
     faces = deepface_api().extract_faces(
-        img_path=frame_bgr,
+        img_path=detection_frame,
         detector_backend=detector_backend,
         enforce_detection=False,
         align=True,
@@ -329,10 +372,10 @@ def detect_and_recognize(
         # DeepFace gives boxes as x/y/w/h. Clamp to non-negative coordinates so
         # OpenCV drawing is robust even when a detector returns edge boxes.
         area = face.get("facial_area") or {}
-        x = max(int(area.get("x", 0)), 0)
-        y = max(int(area.get("y", 0)), 0)
-        w = max(int(area.get("w", 0)), 0)
-        h = max(int(area.get("h", 0)), 0)
+        x = max(int(round(area.get("x", 0) * scale_x)), 0)
+        y = max(int(round(area.get("y", 0) * scale_y)), 0)
+        w = max(int(round(area.get("w", 0) * scale_x)), 0)
+        h = max(int(round(area.get("h", 0) * scale_y)), 0)
         if w == 0 or h == 0:
             continue
 
@@ -477,9 +520,10 @@ def annotate_video(args: argparse.Namespace) -> None:
                     references,
                     model_name=args.model_name,
                     detector_backend=args.detector_backend,
-                    threshold=args.threshold,
-                    min_face_confidence=args.min_face_confidence,
-                )
+                threshold=args.threshold,
+                min_face_confidence=args.min_face_confidence,
+                detection_max_dim=args.detection_max_dim,
+            )
 
             draw_annotations(frame, last_annotations, show_distance=args.show_distance)
             # Output-frame skipping lowers written FPS to preserve approximate
