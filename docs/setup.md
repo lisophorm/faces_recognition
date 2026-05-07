@@ -38,7 +38,7 @@ The project uses:
 - `deepface` for face detection and embedding generation
 - `retina-face` as the detector backend
 - `opencv-python` for reading and writing video
-- `tensorflow` as a DeepFace runtime dependency
+- `tensorflow-cpu` as a DeepFace runtime dependency
 - `tf-keras` for RetinaFace compatibility with current TensorFlow/Keras releases
 - `numpy` for vector operations
 
