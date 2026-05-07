@@ -66,22 +66,4 @@ Each folder can contain one or more `.jpg`, `.jpeg`, `.png`, or `.webp` files. M
 
 The loader also scans subfolders recursively, so it is safe to organise poses or source images under each character directory.
 
-## Submission checklist
-
-Before sending the assessment back, include:
-
-- `annotate_video.py`
-- `requirements.txt`
-- `README.md`
-- `docs/`
-- `AGENTS.md`
-- the generated annotated MP4 output
-- either the reference images used or a note explaining how the reference gallery was built
-
-Recommended final check:
-
-```bash
-python annotate_video.py --input input/nimbus.mp4 --refs refs --output output/test_annotated.mp4 --max-frames 50
-```
-
 See [docs](./docs/README.md) for setup, usage, reference image guidance, troubleshooting, and implementation notes.
