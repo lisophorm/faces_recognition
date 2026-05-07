@@ -32,15 +32,6 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-The `scripts/bootstrap.sh` helper normalizes TensorFlow to the CPU wheel on
-Linux. On Windows, use the same Python environment and install the CPU-only
-TensorFlow wheel manually if needed:
-
-```powershell
-python -m pip uninstall -y tensorflow
-python -m pip install --force-reinstall tensorflow-cpu==2.21.0
-```
-
 Place the downloaded input video at `input/nimbus.mp4`, create reference images under `refs/`, then run:
 
 ```bash
