@@ -2,6 +2,10 @@
 
 This project is a coding-assessment solution that annotates an MP4 video by detecting faces and labelling known Harry Potter characters using DeepFace.
 
+**This assessment presented a problem space I had not worked with directly before. I approached the task as an engineering and research exercise.**
+
+**I believe the final result strongly reflects my capacity to quickly research unfamiliar domains, analyse trade-offs, make pragmatic technical decisions, and deliver a working solution on time and within scope.**
+
 The implementation uses:
 
 - RetinaFace for face detection
