@@ -1,6 +1,6 @@
-deepface
-numpy
-opencv-python
-retina-face
-tensorflow
-tf-keras
+deepface>=0.0.93
+numpy>=1.23.0
+opencv-python>=4.8.0
+retina-face>=0.0.17
+tensorflow>=2.16.0
+tf-keras>=2.16.0

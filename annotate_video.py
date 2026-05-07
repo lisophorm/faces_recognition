@@ -14,6 +14,9 @@ import numpy as np
 # Keep simple CLI operations such as `--help` free from TensorFlow info logs. DeepFace is
 # imported lazily below so this environment variable is set before TensorFlow loads.
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+# DeepFace/RetinaFace are more reliable with current TensorFlow installs when
+# legacy Keras compatibility is enabled. `tf-keras` is included in requirements.
+os.environ.setdefault("TF_USE_LEGACY_KERAS", "1")
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -90,6 +93,21 @@ def parse_args() -> argparse.Namespace:
         help="Maximum cosine distance for a known-person label.",
     )
     parser.add_argument(
+        "--min-face-confidence",
+        type=float,
+        default=0.0,
+        help=(
+            "Minimum detector confidence to keep a face. "
+            "RetinaFace usually returns high confidence for real faces; 0 keeps all "
+            "positive-confidence detections while still dropping DeepFace's no-face fallback."
+        ),
+    )
+    parser.add_argument(
+        "--show-distance",
+        action="store_true",
+        help="Draw the cosine distance next to known labels for debugging/tuning.",
+    )
+    parser.add_argument(
         "--max-frames",
         type=int,
         default=None,
@@ -144,6 +162,8 @@ def validate_processing_args(args: argparse.Namespace) -> None:
         raise ValueError("--max-frames must be at least 1 when provided")
     if not np.isfinite(args.threshold) or args.threshold < 0:
         raise ValueError("--threshold must be a finite non-negative number")
+    if not np.isfinite(args.min_face_confidence) or args.min_face_confidence < 0:
+        raise ValueError("--min-face-confidence must be a finite non-negative number")
     if not args.input.is_file():
         raise FileNotFoundError(f"Input video does not exist: {args.input}")
     if not args.refs.is_dir():
@@ -289,6 +309,7 @@ def detect_and_recognize(
     model_name: str,
     detector_backend: str,
     threshold: float,
+    min_face_confidence: float,
 ) -> list[FaceAnnotation]:
     # Detection and recognition are intentionally split. RetinaFace finds boxes;
     # Facenet512 then embeds each cropped face for identity matching.
@@ -313,6 +334,12 @@ def detect_and_recognize(
         w = max(int(area.get("w", 0)), 0)
         h = max(int(area.get("h", 0)), 0)
         if w == 0 or h == 0:
+            continue
+
+        confidence = face.get("confidence")
+        # When enforce_detection=False, DeepFace can return the full frame as a
+        # zero-confidence fallback if no face is found. Do not draw that as a face.
+        if confidence is not None and float(confidence) <= min_face_confidence:
             continue
 
         face_image = face.get("face")
@@ -347,7 +374,12 @@ def detect_and_recognize(
     return annotations
 
 
-def draw_annotations(frame: np.ndarray, annotations: list[FaceAnnotation]) -> None:
+def draw_annotations(
+    frame: np.ndarray,
+    annotations: list[FaceAnnotation],
+    *,
+    show_distance: bool,
+) -> None:
     for annotation in annotations:
         # Green marks confident known-character matches; orange keeps unknown
         # faces visible without implying the identity is known.
@@ -357,7 +389,7 @@ def draw_annotations(frame: np.ndarray, annotations: list[FaceAnnotation]) -> No
         cv2.rectangle(frame, top_left, bottom_right, color, 2)
 
         text = annotation.label
-        if annotation.distance is not None:
+        if show_distance and annotation.distance is not None:
             text = f"{text} ({annotation.distance:.2f})"
 
         text_origin = (annotation.x, max(annotation.y - 10, 20))
@@ -419,7 +451,9 @@ def annotate_video(args: argparse.Namespace) -> None:
         "Settings: "
         f"model={args.model_name}, detector={args.detector_backend}, "
         f"threshold={args.threshold:.2f}, "
-        f"recognition_interval={recognition_interval}, output_fps={output_fps:.2f}"
+        f"min_face_confidence={args.min_face_confidence:.2f}, "
+        f"recognition_interval={recognition_interval}, output_fps={output_fps:.2f}, "
+        f"show_distance={args.show_distance}"
     )
 
     frame_index = 0
@@ -444,9 +478,10 @@ def annotate_video(args: argparse.Namespace) -> None:
                     model_name=args.model_name,
                     detector_backend=args.detector_backend,
                     threshold=args.threshold,
+                    min_face_confidence=args.min_face_confidence,
                 )
 
-            draw_annotations(frame, last_annotations)
+            draw_annotations(frame, last_annotations, show_distance=args.show_distance)
             # Output-frame skipping lowers written FPS to preserve approximate
             # playback duration instead of speeding up the resulting video.
             if frame_index % output_interval == 0:

@@ -4,9 +4,11 @@
 
 Recommended environment:
 
-- Python 3.10, 3.11, or 3.12
+- Python 3.10 or 3.11
 - An MP4 input video
 - A folder of reference face images for the target characters
+
+Python 3.12 may work with recent TensorFlow builds, but Python 3.10 or 3.11 is the safer choice for DeepFace/TensorFlow compatibility.
 
 Install dependencies from the project root:
 
@@ -34,3 +36,5 @@ The project uses:
 - `tensorflow` as a DeepFace runtime dependency
 - `tf-keras` for RetinaFace compatibility with current TensorFlow/Keras releases
 - `numpy` for vector operations
+
+The script sets `TF_USE_LEGACY_KERAS=1` before importing DeepFace so that RetinaFace works reliably with current TensorFlow/Keras installations.
